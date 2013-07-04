@@ -1,0 +1,91 @@
+diff --git a/views_complex_grouping.module b/views_complex_grouping.module
+index 5196895..c40fc56 100755
+--- a/views_complex_grouping.module
++++ b/views_complex_grouping.module
+@@ -27,7 +27,8 @@ function views_complex_grouping_theme($existing, $type, $theme, $path) {
+         'rows' => array(),
+         'content' => NULL,
+         'title' => '',
+-        'fields' => array()
++        'fields' => array(),
++		'fields_footer' => array()
+       ),
+       'template' => 'views_complex_grouping_level',
+     ), 
+diff --git a/views_complex_grouping_level.tpl.php b/views_complex_grouping_level.tpl.php
+index 200580d..e14762a 100644
+--- a/views_complex_grouping_level.tpl.php
++++ b/views_complex_grouping_level.tpl.php
+@@ -29,4 +29,9 @@
+   <div class="views-complex-grouping-content">
+     <?php print $content; ?>
+   </div>
++  <div class="views-complex-grouping-footer-fields">
++  <?php foreach ($fields_footer as $field): ?>
++    <?php print $field; ?>
++  <?php endforeach; ?>
++  </div>
+ </div>
+diff --git a/views_complex_grouping_style_plugin.inc b/views_complex_grouping_style_plugin.inc
+index 3013209..ff91599 100755
+--- a/views_complex_grouping_style_plugin.inc
++++ b/views_complex_grouping_style_plugin.inc
+@@ -19,6 +19,7 @@ class views_complex_grouping_style_plugin extends views_plugin_style {
+ 
+     foreach ($form['grouping'] as $index => $info) {
+       $grouping_fields_default = (isset($this->options['grouping'][$index]['grouping-complex']['grouping-fields'])) ? $this->options['grouping'][$index]['grouping-complex']['grouping-fields'] : NULL;
++      $grouping_fields_footer_default = (isset($this->options['grouping'][$index]['grouping-complex']['grouping-fields-footer'])) ? $this->options['grouping'][$index]['grouping-complex']['grouping-fields-footer'] : NULL;
+       $grouping_limit_default = (isset($this->options['grouping'][$index]['grouping-complex']['grouping-limit'])) ? $this->options['grouping'][$index]['grouping-complex']['grouping-limit'] : 1;
+       $grouping_offset_default = (isset($this->options['grouping'][$index]['grouping-complex']['grouping-offset'])) ? $this->options['grouping'][$index]['grouping-complex']['grouping-offset'] : 1;
+       
+@@ -35,6 +36,14 @@ class views_complex_grouping_style_plugin extends views_plugin_style {
+         '#default_value' => $grouping_fields_default,
+         '#description' => t('Select which fields will be displayed alongside the field Nr.!num', array('!num' => $index + 1)),
+         ),
++        'grouping-fields-footer' => array(
++        '#type' => 'select',
++        '#multiple' => TRUE,
++        '#title' => t('Selected'),
++        '#options' => $field_labels,
++        '#default_value' => $grouping_fields_footer_default,
++        '#description' => t('Select which fields will be displayed alongside the field Nr.!num', array('!num' => $index + 1)),
++        ),
+         'grouping-limit' => array(
+           '#type' => 'textfield',
+           '#title' => t('Items to display:'),
+@@ -119,11 +128,16 @@ class views_complex_grouping_style_plugin extends views_plugin_style {
+             $set[$grouping]['rows'] = array();
+             $set[$grouping]['level'] = $level;
+             $set[$grouping]['fields'] = array();
++			$set[$grouping]['fields_footer'] = array();
+ 
+             // Add selected fields for this level.
+             foreach ($this->options['grouping'][$level]['grouping-complex']['grouping-fields'] as $field) {
+               $set[$grouping]['fields'][$field] = $this->rendered_fields[$index][$field];
+             }
++			// Add selected fields for this level.
++            foreach ($this->options['grouping'][$level]['grouping-complex']['grouping-fields-footer'] as $field) {
++              $set[$grouping]['fields_footer'][$field] = $this->rendered_fields[$index][$field];
++            }
+ 
+           }
+ 
+@@ -180,6 +194,7 @@ class views_complex_grouping_style_plugin extends views_plugin_style {
+             'grouping_branch' => $branch,
+             'rows' => $set['rows'],
+             'fields' => $set['fields'],
++			'fields_footer' => $set['fields_footer'],
+             'title' => $set['group'])
+         );
+       }
+@@ -200,6 +215,7 @@ class views_complex_grouping_style_plugin extends views_plugin_style {
+             'grouping_branch' => $branch,
+             'rows' => $set['rows'],
+             'fields' => $set['fields'],
++            'fields_footer' => $set['fields_footer'],
+             'title' => $set['group'])
+         );
+       }
+-- 
+1.7.11.1
+
